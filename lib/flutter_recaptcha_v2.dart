@@ -11,36 +11,34 @@ class RecaptchaV2 extends StatefulWidget {
   final String apiSecret;
   final String pluginURL;
   final RecaptchaV2Controller controller;
-  bool visibleCancelBottom;
-  String textCancelButtom;
+  bool visibleCancelBotton;
+  String textCancelButton;
 
-  final ValueChanged<bool> onVerifiedSuccessfully;
-  final ValueChanged<String> onVerifiedError;
+  final ValueChanged<bool>? onVerifiedSuccessfully;
+  final ValueChanged<String>? onVerifiedError;
 
   RecaptchaV2({
-    this.apiKey,
-    this.apiSecret,
+    required this.apiKey,
+    required this.apiSecret,
     this.pluginURL: "https://recaptcha-flutter-plugin.firebaseapp.com/",
-    this.visibleCancelBottom: false,
-    this.textCancelButtom: "CANCEL CAPTCHA",
-    RecaptchaV2Controller controller,
+    this.visibleCancelBotton: false,
+    this.textCancelButton: "CANCEL CAPTCHA",
+    RecaptchaV2Controller? controller,
     this.onVerifiedSuccessfully,
     this.onVerifiedError,
-  })  : controller = controller ?? RecaptchaV2Controller(),
-    assert(apiKey != null, "Google ReCaptcha API KEY is missing."),
-    assert(apiSecret != null, "Google ReCaptcha API SECRET is missing.");
+  })  : controller = controller ?? RecaptchaV2Controller();
 
   @override
   State<StatefulWidget> createState() => _RecaptchaV2State();
 }
 
 class _RecaptchaV2State extends State<RecaptchaV2> {
-  RecaptchaV2Controller controller;
-  WebViewController webViewController;
+  late RecaptchaV2Controller controller;
+  late WebViewController webViewController;
 
   void verifyToken(String token) async {
     String url = "https://www.google.com/recaptcha/api/siteverify";
-    http.Response response = await http.post(url, body: {
+    http.Response response = await http.post(Uri(scheme: url), body: {
       "secret": widget.apiSecret,
       "response": token,
     });
@@ -48,10 +46,16 @@ class _RecaptchaV2State extends State<RecaptchaV2> {
     if (response.statusCode == 200) {
       dynamic json = jsonDecode(response.body);
       if (json['success']) {
-        widget.onVerifiedSuccessfully(true);
+        if (widget.onVerifiedSuccessfully != null) {
+          widget.onVerifiedSuccessfully!(true);
+        }
       } else {
-        widget.onVerifiedSuccessfully(false);
-        widget.onVerifiedError(json['error-codes'].toString());
+        if (widget.onVerifiedSuccessfully != null) {
+          widget.onVerifiedSuccessfully!(false);
+        }
+        if (widget.onVerifiedError != null) {
+          widget.onVerifiedError!(json['error-codes'].toString());
+        }
       }
     }
 
@@ -120,7 +124,7 @@ class _RecaptchaV2State extends State<RecaptchaV2> {
                 },
               ),
               Visibility(
-                visible: widget.visibleCancelBottom,
+                visible: widget.visibleCancelBotton,
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: SizedBox(
@@ -130,7 +134,7 @@ class _RecaptchaV2State extends State<RecaptchaV2> {
                       children: <Widget>[
                         Expanded(
                           child: RaisedButton(
-                            child: Text(widget.textCancelButtom),
+                            child: Text(widget.textCancelButton),
                             onPressed: () {
                               controller.hide();
                             },
