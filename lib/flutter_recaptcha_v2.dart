@@ -1,9 +1,9 @@
 library flutter_recaptcha_v2;
 
+import 'package:dio/dio.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class RecaptchaV2 extends StatefulWidget {
@@ -35,16 +35,18 @@ class RecaptchaV2 extends StatefulWidget {
 class _RecaptchaV2State extends State<RecaptchaV2> {
   late RecaptchaV2Controller controller;
   late WebViewController webViewController;
+  var dio = Dio();
 
   void verifyToken(String token) async {
     String url = "https://www.google.com/recaptcha/api/siteverify";
-    http.Response response = await http.post(Uri(scheme: url), body: {
+
+    var response = await  dio.post(url, data: {
       "secret": widget.apiSecret,
       "response": token,
     });
 
     if (response.statusCode == 200) {
-      dynamic json = jsonDecode(response.body);
+      dynamic json = jsonDecode(response.data);
       if (json['success']) {
         if (widget.onVerifiedSuccessfully != null) {
           widget.onVerifiedSuccessfully!(true);
