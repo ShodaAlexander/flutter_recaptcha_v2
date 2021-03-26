@@ -40,7 +40,7 @@ class _RecaptchaV2State extends State<RecaptchaV2> {
   void verifyToken(String token) async {
     String url = "https://www.google.com/recaptcha/api/siteverify";
 
-    var response = await  dio.post(url, data: {
+    var response = await  dio.post(url, queryParameters: {
       "secret": widget.apiSecret,
       "response": token,
     });
